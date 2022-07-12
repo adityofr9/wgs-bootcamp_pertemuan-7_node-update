@@ -79,14 +79,29 @@ yargs.command({
     command: 'update',
     describe: 'update contact base on name',
     builder:{
-        name:{
-            describe: 'Contact Name',
+        findName:{
+            describe: 'Find Contact Name',
             demandOption: true,
+            type: 'string',
+        },
+        name: {
+            describe: 'Contact Name',
+            demandOption: false,
+            type: 'string',
+        },
+        email: {
+            describe: 'Contact email',
+            demandOption: false,
+            type: 'string',
+        },
+        mobile: {
+            describe: 'contact mobile phone number',
+            demandOption: false,
             type: 'string',
         },
     },
     handler(argv){
-        contacts.updateContact(argv.name);
+        contacts.updateContact(argv.findName,argv.name,argv.email,argv.mobile);
     },
     
 });
