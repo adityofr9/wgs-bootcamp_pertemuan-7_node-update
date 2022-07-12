@@ -1,0 +1,25 @@
+{
+  "name": "wgs-bootcamp_pertemuan-5_contact",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adityofr9/wgs-bootcamp_pertemuan-5_Contact.git"
+  },
+  "author": "adityofr9",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adityofr9/wgs-bootcamp_pertemuan-5_Contact/issues"
+  },
+  "homepage": "https://github.com/adityofr9/wgs-bootcamp_pertemuan-5_Contact#readme",
+  "dependencies": {
+    "validator": "^13.7.0",
+    "yargs": "^17.5.1"
+  },
+  "keywords": [],
+  "description": ""
+}
