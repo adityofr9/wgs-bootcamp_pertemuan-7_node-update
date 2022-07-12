@@ -36,15 +36,20 @@ const listContact = () => {
 //Fungsi untuk menampilkan detail data contact berdasarkan nama
 const detailContact = (name) => {
     const contacts = loadContact();
+    //Mencari data nama contact yang sama dengan nama yang diinput
     const findContact = contacts.find((contact) => contact.name.toLowerCase() === name.toLowerCase());
     // console.log(findContact);
-    //Pengkodisian apabila data contact ditemukan
+
+    //Pengkodisian apabila data nama contact ditemukan
     if (findContact) {
         console.log(findContact.name);
-        console.log(findContact.email);
+        //Bila data email contact ada atau terdefinisi
+        if (findContact.email) {
+            console.log(findContact.email);
+        }
         console.log(findContact.mobile);
-    } else {    //Apabila data contact tidak ditemukan
-        console.log('Data tidak ditemukan!');
+    } else {    //Apabila data nama contact tidak ditemukan
+        console.log(`Data contact dengan nama ${name} tidak ditemukan!`);
         return false;
     }
 }
@@ -53,18 +58,20 @@ const detailContact = (name) => {
 const deleteContact = (name) => {
     const contacts = loadContact();
     // console.log(contacts);
-    //Mencari data contact berdasarkan nama
+    
+    //Mencari data nama contact yang sama dengan nama yang diinput
     const findContact = contacts.find((contact) => contact.name.toLowerCase() === name.toLowerCase());
-    //Pengkondisian apabila data contact ditemukan berdasarkan nama
+    //Pengkondisian apabila data contact ditemukan berdasarkan nama yang diinput
     if (findContact) {
-        //Membuat array baru dengan filter tanpa data contact yang berdasarkan nama
+        //Membuat array baru dengan filter tanpa object data contact berdasarkan nama yang diinput
         var newContacts = contacts.filter((contact) => contact.name.toLowerCase() !== name.toLowerCase());
         // console.log(newContacts);
+
         //Menyimpan array data contact yang baru ke file contact.json
         fs.writeFileSync('data/contacts.json', JSON.stringify(newContacts));
         // console.log(contacts);
         console.log(`Data contact dengan nama: ${name} telah dihapus!`);
-    } else {    //Apabila data contact tidak ditemukan
+    } else {    //Apabila data contact berdasarkan nama yang diinput tidak ditemukan
         console.log('Data yang akan dihapus tidak ditemukan!');
         return false;
     }
@@ -73,62 +80,71 @@ const deleteContact = (name) => {
 //Fungsi untuk mengubah data contact berdasarkan nama
 const updateContact = (findName, name, email, mobile) => {
     const contacts = loadContact();
+    //Mencari data nama contact yang sama dengan nama yang dicari
     const findContact = contacts.find((contact) => contact.name.toLowerCase() === findName.toLowerCase());
     // console.log(contacts);
-    //Menemukan nilai index array pada data yang dicari
+
+    //Menemukan nilai index object pada data nama yang dicari
     const idxContact = contacts.findIndex((idx => idx.name.toLowerCase() == findName.toLowerCase()));
     // console.log(idxContact);
     
-    //Mengecek apakah data yang dicari ditemukan atau tidak
+    //Pengkondisian bila data nama contact yang dicari tidak ada
     if (!findContact) {
         console.log(`Data dengan nama "${findName}" tidak ditemukan!`);
         return false;
     }
-
+    
     //Pengkondisian input data nama baru
     if (name) {
-        //Mengecek duplikasi input nama
-        const duplicateName = contacts.find((contact) => contact.name === name);
+        //Pengecekan duplikasi nama baru yang diinput
+        const duplicateName = contacts.find((contact) => contact.name.toLowerCase() === name.toLowerCase());
         if (duplicateName) {
             console.log(`Data dengan nama "${name}" sudah ada! Coba kembali!`);
             return false;
         }
-        //Simpan input data nama baru kedalam array dengan index yang dicari
+        //Simpan input data nama baru kedalam object dengan index yang dicari
         contacts[idxContact].name = name;
         // console.log(contacts);
     }
 
-    //Mengecek apakah data email diinput atau tidak
-    if (!email) {
-        //Jika tidak diinput maka data email dihapus
-        // delete contacts[idxContact].email;
-        // console.log(contacts);
-    } else {
-        //Jika data email diinput maka data email akan dirubah
-        //Mengecek validasi inputan email
-        const vldEmail = validator.isEmail(email);
-        if (vldEmail == false) {
-            console.log('Data email yang dimasukkan invalid!');
-            return false;
-        }
-        //Simpan input data email baru kedalam array dengan index yang dicari
-        contacts[idxContact].email = email;
+    //Pengkondisian input data email baru
+    if (email == '') {
+        //Jika input email benilai kosong atau '' maka data email dihapus
+        delete contacts[idxContact].email;
         // console.log(contacts);
     }
+    //Pengkondisian bila input data email terisi
+    else if (email) {
+        //Pengkondisian jika data email pada object yang dipilih tidak terdefinisi(undefined)
+        if (contacts[idxContact].email == undefined) {
+            //Mendefinisikan kembali urutan properti pada object berdasarkan index yang dipilih
+            contacts[idxContact] = {name: findContact.name, email: findContact.email, mobile: findContact.mobile};
+            // console.log(contacts[idxContact].email);
+        }
+        //Memvalidasi input data email baru dengan validator
+        const vldEmail = validator.isEmail(email);
+        //Pengkondisian bila input email invalid
+        if (vldEmail == false) {
+            console.log('Data email yang dimasukkan invalid!');
+            return false
+        }
+        //Simpan input data email baru kedalam objet dengan index yang dipilih
+        contacts[idxContact].email = email;
+    }
 
-    //Mengecek apakah input data mobile diinput atau tidak
+    //Pengkondisian bila tidak ada input data mobile baru
     if (!mobile) {
         console.log(contacts);
         console.log(`Data Contact dengan nama ${findName} telah diupdate!`);
     } else {
         //Jika data mobile diinput maka data mobile akan dirubah
-        //Mengecek validasi inputan mobile sesuai format Indonesia
+        //Memvalidasi inputan data mobile baru sesuai format Indonesia
         const vldMobile = validator.isMobilePhone(mobile, 'id-ID');
         if (vldMobile == false) {
             console.log('Data mobile phone yang dimasukkan invalid!');
             return false;
         }
-        //Simpan input data mobile baru kedalam array dengan index yang dicari
+        //Simpan input data mobile baru kedalam object dengan index yang dipilih
         contacts[idxContact].mobile = mobile;
         console.log(contacts);
         console.log(`Data Contact dengan nama ${findName} telah diupdate!`);
@@ -142,19 +158,16 @@ const updateContact = (findName, name, email, mobile) => {
 //Fungsi untuk menyimpan data contact
 const saveContact = (name, email, mobile) => {
     const contact = {name, email, mobile};
-    // const file = fs.readFileSync('data/contacts.json', 'utf8');
-    // const contacts = JSON.parse(file);
-    //2 baris code diatas dijadikan kedalam fungsi loadContact()
     const contacts = loadContact();
 
     //Variabel untuk menemukan isi name yang sama pada array
-    const duplicateName = contacts.find((contact) => contact.name === name);
+    const duplicateName = contacts.find((contact) => contact.name.toLowerCase() === name.toLowerCase());
     //Variabel untuk memvalidasi email dengan NPM Validator
     const vldEmail = validator.isEmail(contact.email);
     //Variabel untuk memvalidasi nomor telepon dengan NPM Validator
     const vldMobile = validator.isMobilePhone(contact.mobile, 'id-ID');
     
-    //Pengkondisian apabila duplikat isi name pada array tidak ada
+    //Pengkondisian apabila tidak ada duplikasi isi name pada array
     if (!duplicateName) {
         //Pengkondisian apabila input variabel vldEmail sudah valid
         if (vldEmail == true) {
@@ -176,7 +189,7 @@ const saveContact = (name, email, mobile) => {
             return false;
         };
     }
-    //Apabila duplikat isi name pada array ditemukan
+    //Apabila ditemukan duplikasi isi name pada array
     else {
         console.log('Data name yang dimasukkan sudah ada!');
         return false;
